@@ -1,113 +1,140 @@
-PROJET 2 – CLUBS DE GOLF – CHECKLIST
+# Projet 2 – Gestion de clubs de golf
 
-================================================
-PHASE 0 – ALL TOGETHER (before splitting)
-================================================
-[ ] Create Git repo + WinForms project (LINQ to SQL)
-[ ] Agree on folder structure (Forms/Employes, Forms/Abonnes,
-    Forms/Rapports) + naming conventions
-[ ] Each person writes CREATE TABLE for their own tables
-      A: Employes, TypesEmploye, Services, Depenses
-      B: Abonnements, Dependants, Reabonnements
-      C: PrixDepensesAbonnements, PartiesJouees, Terrains,
-         TypesAbonnement, Provinces
-[ ] Merge into one script and check it against the spec
-      - exact table/field names
-      - no auto-increment PKs, no cascade delete
-      - int / money only, dates without time
-      - Sexe char(1), IdProvince char(2), CodePostal char(6),
-        Telephone/Cellulaire char(10)
-      - everything NOT NULL except Remarque + Cellulaire
-[ ] Seed data: 13 provinces, 6 courses (3x18 + 3x9 holes, unique names),
-    6 subscription types + 2026 prices, 7 employee types,
-    admin = employee #1
-[ ] Test data: employees of every type, members + dependents,
-    games, expenses, services
-[ ] Generate the .dbml ONCE, commit it (nobody edits it alone)
-[ ] Agree on shared function signatures + stub them:
-      Session (current employee no + type)
-      EstAbonnementActif(idAbonnement)       -> B writes it
-      GetPrixCourant(noType, annee)          -> C writes it
-[ ] Submit the DB (BDB56Projet2NomEquipe)
+420-B56 Bases de données III – Automne 2026
 
-================================================
-PHASE 1 – SHARED SKELETON (Person A, everyone pulls after)
-================================================
-[ ] Login form + password rules (8+ chars, letter, digit, symbol)
-[ ] Session static class
-[ ] MainForm with ALL 11 buttons, shown/hidden by role
-[ ] Validation helper (postal code, phone, age, password)
-[ ] Shared access-conflict pattern
-    (catch ChangeConflictException -> message -> reload)
-[ ] Logout + exit
+WinForms app using LINQ to SQL, with the database `BDB56Projet2NomEquipe`.
 
-================================================
-PERSON A – EMPLOYEES & EXPENSES
-================================================
-[ ] Gestion des employés: DataGridView with all employees
-[ ] Add form: auto number, can't add an admin, age 16–65,
-    hourly wage 17–500$, validate everything except Remarque
-[ ] Edit form (separate): everything except no + type
-[ ] Delete: not the admin, can't delete yourself (admin/direction),
-    not if they give services, ask for confirmation
-[ ] Inscription d'une dépense:
-      - pick member, amount max 1000$, remark
-      - service type set by employee role (admin/direction/owner pick it)
-      - insert the Service if it doesn't exist, auto expense no
-      - block if subscription expired
-      - all in one transaction
-[ ] Info form after an expense (member, date, amount, service,
-    employee, total spent, amount left to reach the minimum)
+## Team split
 
-================================================
-PERSON B – MEMBERS
-================================================
-[ ] EstAbonnementActif() helper (others need it!)
-[ ] Abonnement:
-      - ID NomN P (sequential), date = today
-      - age: 60+ for Âge d'or, 18+ for others
-      - spouse (types 3–6): ID NomN H/F 0, 18+
-      - children (types 4–6): ID NomN E#, under 18,
-        type 6 asks how many (3–9)
-      - all inserts in ONE transaction, success message
-[ ] Réabonnement: list renewable subs, remark,
-    can't renew twice in the same year
-[ ] Mise à jour des abonnés:
-      - 2 linked DataGridViews (selecting a member shows their dependents)
-      - edit directly in the grid, lock the read-only columns
-      - Save button, one transaction
+| | Person A – Employees & expenses | Person B – Members | Person C – Prices, games, reports |
+|---|---|---|---|
+| **Use cases** | Login, Gestion des employés, Inscription d'une dépense, Déconnexion / Sortie | Abonnement, Réabonnement, Mise à jour des abonnés | Modification prix/dépenses, Inscription partie jouée, Rapports, Statistiques |
+| **Tables owned** | `Employes`, `TypesEmploye`, `Services`, `Depenses` | `Abonnements`, `Dependants`, `Reabonnements` | `PrixDepensesAbonnements`, `PartiesJouees`, `Terrains`, `TypesAbonnement`, `Provinces` |
+| **Shared helper** | `Session`, permissions | `EstAbonnementActif()` | `GetPrixCourant()` |
 
-================================================
-PERSON C – PRICES, GAMES, REPORTS, STATS
-================================================
-[ ] GetPrixCourant() helper
-[ ] Inscription d'une partie jouée: member + course + score
-    + remark, date = today, blocked if not renewed this year
-[ ] Modification prix/dépenses: grid of all types, once per year,
-    insert ALL types (changed or not), one transaction
-[ ] 6 reports (ReportViewer, tabs)
-      - expenses by employee / by subscription / by year
-      - games by course / by subscription / by year
-[ ] 6 stats with totals + subtotals (tabs)
-      - subscriptions by year x type / by month (current year) x type
-      - games by year x course / by month x course
-      - expenses by year x subscription / by month x subscription
+## Rules
 
-================================================
-PARTIAL SUBMISSION
-================================================
-[ ] A: Gestion des employés + login working
-[ ] B: Abonnement working
-[ ] C: Partie jouée (or Prix) working
-[ ] Merge, test, submit
+- Only one person regenerates the `.dbml`, after telling the group. Nobody edits it alone.
+- Work only in your own folder (`Forms/Employes`, `Forms/Abonnes`, `Forms/Rapports`).
+- Don't touch `MainForm` (Person A owns it).
+- Pull often. Commit the `.csproj` changes separately.
 
-================================================
-FINAL – ALL TOGETHER
-================================================
-[ ] Merge everything, test each role's permissions
-    (hidden/disabled buttons per role)
-[ ] Test access conflicts (run 2 instances at once)
-[ ] UI polish, 10% of the grade: DatePicker, NumericUpDown,
-    MaskedTextBox, ComboBox, clean layout
-[ ] Final test pass with fresh DB script
-[ ] Submit
+---
+
+## Phase 0 – All together (before splitting)
+
+- [ ] Create Git repo + WinForms project (LINQ to SQL)
+- [ ] Agree on folder structure + naming conventions
+- [ ] Each person writes `CREATE TABLE` for their own tables
+  - A: `Employes`, `TypesEmploye`, `Services`, `Depenses`
+  - B: `Abonnements`, `Dependants`, `Reabonnements`
+  - C: `PrixDepensesAbonnements`, `PartiesJouees`, `Terrains`, `TypesAbonnement`, `Provinces`
+- [ ] Merge into one script and check it against the spec
+  - [ ] Exact table/field names
+  - [ ] No auto-increment PKs, no cascade delete
+  - [ ] `int` / `money` only, dates without time
+  - [ ] `Sexe` char(1), `IdProvince` char(2), `CodePostal` char(6), `Telephone`/`Cellulaire` char(10)
+  - [ ] Everything `NOT NULL` except `Remarque` + `Cellulaire`
+- [ ] Seed data
+  - [ ] 13 provinces
+  - [ ] 6 courses (3 × 18 holes, 3 × 9 holes, unique names)
+  - [ ] 6 subscription types + 2026 prices
+  - [ ] 7 employee types
+  - [ ] Admin = employee #1
+- [ ] Test data: employees of every type, members + dependents, games, expenses, services
+- [ ] Generate the `.dbml` **once** and commit it
+- [ ] Agree on shared function signatures + stub them
+  - [ ] `Session` (current employee no + type)
+  - [ ] `EstAbonnementActif(idAbonnement)`, written by B
+  - [ ] `GetPrixCourant(noType, annee)`, written by C
+- [ ] Submit the DB
+
+## Phase 1 – Shared skeleton (Person A, everyone pulls after)
+
+- [ ] Login form + password rules (8+ chars, letter, digit, symbol)
+- [ ] `Session` static class
+- [ ] `MainForm` with **all 11 buttons**, shown/hidden by role
+- [ ] Validation helper (postal code, phone, age, password)
+- [ ] Shared access-conflict pattern (`catch ChangeConflictException` → message → reload)
+- [ ] Logout + exit
+
+## Person A – Employees & expenses
+
+- [ ] **Gestion des employés**: DataGridView with all employees
+- [ ] Add form
+  - [ ] Auto number
+  - [ ] Can't add an admin
+  - [ ] Age 16–65, hourly wage 17–500 $
+  - [ ] Validate everything except `Remarque`
+- [ ] Edit form (separate): everything except no + type
+- [ ] Delete
+  - [ ] Not the admin
+  - [ ] Can't delete yourself (admin/direction)
+  - [ ] Not if they give services
+  - [ ] Ask for confirmation
+- [ ] **Inscription d'une dépense**
+  - [ ] Pick member, amount max 1000 $, remark
+  - [ ] Service type set by employee role (admin/direction/owner pick it)
+  - [ ] Insert the `Service` if it doesn't exist, auto expense no
+  - [ ] Block if subscription expired
+  - [ ] All in one transaction
+- [ ] Info form after an expense (member, date, amount, service, employee, total spent, amount left to reach the minimum)
+
+## Person B – Members
+
+- [ ] `EstAbonnementActif()` helper (**others need it, do it first**)
+- [ ] **Abonnement**
+  - [ ] ID `Nom#P` (sequential), date = today
+  - [ ] Age: 60+ for Âge d'or, 18+ for others
+  - [ ] Spouse (types 3–6): ID `Nom#H0` / `Nom#F0`, 18+
+  - [ ] Children (types 4–6): ID `Nom#E1`, `Nom#E2`…, under 18
+  - [ ] Type 6 asks how many children (3–9)
+  - [ ] All inserts in **one transaction**, success message
+- [ ] **Réabonnement**
+  - [ ] List renewable subscriptions (id + full name)
+  - [ ] Remark
+  - [ ] Can't renew twice in the same year
+- [ ] **Mise à jour des abonnés**
+  - [ ] 2 linked DataGridViews (selecting a member shows their dependents)
+  - [ ] Edit directly in the grid, lock the read-only columns
+  - [ ] Save button, one transaction
+
+## Person C – Prices, games, reports, stats
+
+- [ ] `GetPrixCourant()` helper
+- [ ] **Inscription d'une partie jouée**
+  - [ ] Member + course + score + remark, date = today
+  - [ ] Blocked if not renewed this year
+- [ ] **Modification prix/dépenses**
+  - [ ] Grid of all types, edit in the grid
+  - [ ] Once per year only
+  - [ ] Insert **all** types (changed or not), one transaction
+- [ ] **Rapports** (ReportViewer, tabs)
+  - [ ] Expenses by employee
+  - [ ] Expenses by subscription
+  - [ ] Expenses by year
+  - [ ] Games by course
+  - [ ] Games by subscription
+  - [ ] Games by year
+- [ ] **Statistiques** with totals + subtotals (tabs)
+  - [ ] Subscriptions by year × type
+  - [ ] Subscriptions by month (current year) × type
+  - [ ] Games by year × course
+  - [ ] Games by month (current year) × course
+  - [ ] Expenses by year × subscription
+  - [ ] Expenses by month (current year) × subscription
+
+## Partial submission (3+ use cases working)
+
+- [ ] A: Gestion des employés + login
+- [ ] B: Abonnement
+- [ ] C: Partie jouée (or Prix)
+- [ ] Merge, test, submit
+
+## Final – All together
+
+- [ ] Merge everything, test each role's permissions (hidden/disabled buttons)
+- [ ] Test access conflicts (run 2 instances at once)
+- [ ] UI polish (10% of the grade): DatePicker, NumericUpDown, MaskedTextBox, ComboBox, clean layout
+- [ ] Final test pass with a fresh DB script
+- [ ] Submit
