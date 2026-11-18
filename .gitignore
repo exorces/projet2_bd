@@ -40,3 +40,8 @@ TestResults/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local SQL Server database files
+*.mdf
+*.ldf
+*.ndf
