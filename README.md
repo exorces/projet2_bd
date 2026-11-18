@@ -6,7 +6,7 @@ WinForms app using LINQ to SQL, with the database `BDB56Projet2NomEquipe`.
 
 ## Team split
 
-| | Person A – Employees & expenses | Person B – Members | Person C – Prices, games, reports |
+| | George – Employees & expenses | Bolu – Members | Ken – Prices, games, reports |
 |---|---|---|---|
 | **Use cases** | Login, Gestion des employés, Inscription d'une dépense, Déconnexion / Sortie | Abonnement, Réabonnement, Mise à jour des abonnés | Modification prix/dépenses, Inscription partie jouée, Rapports, Statistiques |
 | **Tables owned** | `Employes`, `TypesEmploye`, `Services`, `Depenses` | `Abonnements`, `Dependants`, `Reabonnements` | `PrixDepensesAbonnements`, `PartiesJouees`, `Terrains`, `TypesAbonnement`, `Provinces` |
