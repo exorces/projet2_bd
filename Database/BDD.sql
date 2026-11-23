@@ -15,7 +15,11 @@ GO
 CREATE TABLE TypesEmployes (
     No INT NOT NULL,
     Description VARCHAR(50),
-    Remarque VARCHAR(50)
+    Remarque VARCHAR(50),
+
+    --CONSTRAINT PK_TypesEmployes PRIMARY KEY (No),
+    --CONSTRAINT FK_NOTypesEmployes FOREIGN KEY (No)
+    --REFERENCES Employes (No) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
 
 CREATE TABLE Terrains (
@@ -137,7 +141,7 @@ GO
 
 CREATE TABLE Depense (
     No INT NOT NULL,
-    IdAbonnement INT NOT NULL,
+    IdAbonnement VARCHAR(50) NOT NULL,
     DateDepense DATE NOT NULL,
     Montant INT NOT NULL,
     NoService INT NOT NULL,
