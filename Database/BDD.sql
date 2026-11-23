@@ -120,7 +120,7 @@ primary key (IdAbonnement, DateRenouvellement)
 )
 
 CREATE TABLE PartiesJouees (
-    IdAbonnement nvarchar(50)  NOT NULL,
+    IdAbonnement nvarchar(10)  NOT NULL,
     NoTerrain    int           NOT NULL,
     DatePartie   date          NOT NULL,
     Pointage     int           NOT NULL,
@@ -141,7 +141,7 @@ GO
 
 CREATE TABLE Depense (
     No INT NOT NULL,
-    IdAbonnement VARCHAR(50) NOT NULL,
+    IdAbonnement VARCHAR(10) NOT NULL,
     DateDepense DATE NOT NULL,
     Montant INT NOT NULL,
     NoService INT NOT NULL,
