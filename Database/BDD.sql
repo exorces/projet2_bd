@@ -1,85 +1,60 @@
--- George Georgiev -- 
+-- George Georgiev --
 -- Bolu --
 -- Ken --
 
-USE BDB56P2BKG
+USE BDB56P2BKG;
+GO
 
-CREATE TABLE Employes (
-	No INT NOT NULL,
-    MotDePasse VARCHAR(50) NOT NULL,
-    Nom VARCHAR(50) NOT NULL,
-    Prenom VARCHAR(50) NOT NULL,
-    Sexe CHAR(1) NOT NULL,
-    Age INT NOT NULL,
-    NoCivique INT NOT NULL,
-    Rue VARCHAR(100) NOT NULL,
-    Ville VARCHAR(50) NOT NULL,
-    IdProvince CHAR(2) NOT NULL,
-    CodePostal CHAR(6) NOT NULL,
-    Telephone CHAR(10) NOT NULL,
-    Cellulaire CHAR(10) NULL,
-    Courriel VARCHAR(100) NOT NULL,
-    SalaireHoraire MONEY NOT NULL,
-    NoTypeEmploye INT NOT NULL,
-    Remarque VARCHAR(255) NULL
-)
-
-CREATE TABLE TypesEmployes (
-    No INT NOT NULL,
-    Description VARCHAR(50),
-    Remarque VARCHAR(50)
-)
-
-CREATE TABLE Services (
-    No INT NOT NULL,
-    TypeService VARCHAR(50) NOT NULL,
-    NoEmploye INT NOT NULL,
-    Remarque VARCHAR(50) NOT NULL
-)
-
-CREATE TABLE Depense (
-    No INT NOT NULL,
-    IdAbonnement INT NOT NULL,
-    DateDepense DATE NOT NULL,
-    Montant INT NOT NULL,
-    NoService INT NOT NULL,
-    Remarque VARCHAR(50) NOT NULL
-)
+-- ============================================================
+-- 1. TABLES PARENTES INDÉPENDANTES
+-- ============================================================
 
 CREATE TABLE Provinces (
-    Id       char(2)       NOT NULL,
-    Nom      nvarchar(50)  NOT NULL,
-    Remarque nvarchar(255) NULL,
+    Id       CHAR(2)       NOT NULL,
+    Nom      NVARCHAR(50)  NOT NULL,
+    Remarque NVARCHAR(255) NULL,
     CONSTRAINT PK_Provinces PRIMARY KEY (Id)
 );
 GO
 
+CREATE TABLE TypesEmploye (
+    No          INT           NOT NULL,
+    Description NVARCHAR(50)  NOT NULL,
+    Remarque    NVARCHAR(255) NULL,
+    CONSTRAINT PK_TypesEmploye PRIMARY KEY (No)
+);
+GO
+
+CREATE TABLE TypesAbonnement (
+    No          INT           NOT NULL,
+    Description NVARCHAR(50)  NOT NULL,
+    Remarque    NVARCHAR(255) NULL,
+    CONSTRAINT PK_TypesAbonnement PRIMARY KEY (No)
+);
+GO
+
 CREATE TABLE Terrains (
-    No          int           NOT NULL,
-    Nom         nvarchar(50)  NOT NULL,
-    NombreTrous int           NOT NULL,
-    Description nvarchar(255) NOT NULL,
-    Remarque    nvarchar(255) NULL,
+    No          INT           NOT NULL,
+    Nom         NVARCHAR(50)  NOT NULL,
+    NombreTrous INT           NOT NULL,
+    Description NVARCHAR(255) NOT NULL,
+    Remarque    NVARCHAR(255) NULL,
     CONSTRAINT PK_Terrains PRIMARY KEY (No),
     CONSTRAINT UQ_Terrains_Nom UNIQUE (Nom),
     CONSTRAINT CK_Terrains_NombreTrous CHECK (NombreTrous IN (9, 18))
 );
 GO
 
-CREATE TABLE TypesAbonnement (
-    No          int           NOT NULL,
-    Description nvarchar(50)  NOT NULL,
-    Remarque    nvarchar(255) NULL,
-    CONSTRAINT PK_TypesAbonnement PRIMARY KEY (No)
-);
-GO
+-- ============================================================
+-- 2. TABLES ENFANTS DE NIVEAU 1
+-- ============================================================
 
 CREATE TABLE PrixDepensesAbonnements (
-    NoTypeAbonnement     int           NOT NULL,
-    Annee                int           NOT NULL,
-    Prix                 money         NOT NULL,
-    DepensesObligatoires money         NOT NULL,
-    Remarque             nvarchar(255) NULL,
+    NoTypeAbonnement     INT           NOT NULL,
+    Annee                INT           NOT NULL,
+    Prix                 MONEY         NOT NULL,
+    DepensesObligatoires MONEY         NOT NULL,
+    Remarque             NVARCHAR(255) NULL,
     CONSTRAINT PK_PrixDepensesAbonnements PRIMARY KEY (NoTypeAbonnement, Annee),
     CONSTRAINT FK_PrixDepensesAbonnements_TypesAbonnement
         FOREIGN KEY (NoTypeAbonnement) REFERENCES TypesAbonnement(No)
@@ -89,19 +64,156 @@ CREATE TABLE PrixDepensesAbonnements (
 );
 GO
 
+CREATE TABLE Employes (
+    No             INT           NOT NULL,
+    MotDePasse     NVARCHAR(50)  NOT NULL,
+    Nom            NVARCHAR(50)  NOT NULL,
+    Prenom         NVARCHAR(50)  NOT NULL,
+    Sexe           CHAR(1)       NOT NULL,
+    Age            INT           NOT NULL,
+    NoCivique      INT           NOT NULL,
+    Rue            NVARCHAR(100) NOT NULL,
+    Ville          NVARCHAR(50)  NOT NULL,
+    IdProvince     CHAR(2)       NOT NULL,
+    CodePostal     CHAR(6)       NOT NULL,
+    Telephone      CHAR(10)      NOT NULL,
+    Cellulaire     CHAR(10)      NULL,
+    Courriel       NVARCHAR(100) NOT NULL,
+    SalaireHoraire MONEY         NOT NULL,
+    NoTypeEmploye  INT           NOT NULL,
+    Remarque       NVARCHAR(255) NULL,
+    CONSTRAINT PK_Employes PRIMARY KEY (No),
+    CONSTRAINT FK_Employes_Provinces
+        FOREIGN KEY (IdProvince) REFERENCES Provinces(Id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT FK_Employes_TypesEmploye
+        FOREIGN KEY (NoTypeEmploye) REFERENCES TypesEmploye(No)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT CK_Employes_Sexe CHECK (Sexe IN ('H', 'F')),
+    CONSTRAINT CK_Employes_Age CHECK (Age BETWEEN 16 AND 65),
+    CONSTRAINT CK_Employes_SalaireHoraire CHECK (SalaireHoraire BETWEEN 17.00 AND 500.00),
+    CONSTRAINT CK_Employes_CodePostal CHECK (LEN(CodePostal) = 6),
+    CONSTRAINT CK_Employes_Telephone CHECK (LEN(Telephone) = 10),
+    CONSTRAINT CK_Employes_Cellulaire CHECK (Cellulaire IS NULL OR LEN(Cellulaire) = 10)
+);
+GO
+
+CREATE TABLE Abonnements (
+    Id               NVARCHAR(50)  NOT NULL,
+    DateAbonnement   DATE          NOT NULL,
+    Nom              NVARCHAR(50)  NOT NULL,
+    Prenom           NVARCHAR(50)  NOT NULL,
+    Sexe             CHAR(1)       NOT NULL,
+    DateNaissance    DATE          NOT NULL,
+    NoCivique        NVARCHAR(20)  NOT NULL,
+    Rue              NVARCHAR(100) NOT NULL,
+    Ville            NVARCHAR(50)  NOT NULL,
+    IdProvince       CHAR(2)       NOT NULL,
+    CodePostal       CHAR(6)       NOT NULL,
+    Telephone        CHAR(10)      NOT NULL,
+    Cellulaire       CHAR(10)      NULL,
+    Courriel         NVARCHAR(100) NOT NULL,
+    NoTypeAbonnement INT           NOT NULL,
+    Remarque         NVARCHAR(255) NULL,
+    CONSTRAINT PK_Abonnements PRIMARY KEY (Id),
+    CONSTRAINT FK_Abonnements_Provinces
+        FOREIGN KEY (IdProvince) REFERENCES Provinces(Id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT FK_Abonnements_TypesAbonnement
+        FOREIGN KEY (NoTypeAbonnement) REFERENCES TypesAbonnement(No)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT CK_Abonnements_Sexe CHECK (Sexe IN ('H', 'F')),
+    CONSTRAINT CK_Abonnements_CodePostal CHECK (LEN(CodePostal) = 6),
+    CONSTRAINT CK_Abonnements_Telephone CHECK (LEN(Telephone) = 10),
+    CONSTRAINT CK_Abonnements_Cellulaire CHECK (Cellulaire IS NULL OR LEN(Cellulaire) = 10)
+);
+GO
+
+-- ============================================================
+-- 3. TABLES ENFANTS DE NIVEAU 2
+-- ============================================================
+
+CREATE TABLE Services (
+    No          INT           NOT NULL,
+    TypeService NVARCHAR(50)  NOT NULL,
+    NoEmploye   INT           NOT NULL,
+    Remarque    NVARCHAR(255) NULL,
+    CONSTRAINT PK_Services PRIMARY KEY (No),
+    CONSTRAINT FK_Services_Employes
+        FOREIGN KEY (NoEmploye) REFERENCES Employes(No)
+        ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+GO
+
+CREATE TABLE Dependants (
+    Id            NVARCHAR(50)  NOT NULL,
+    Nom           NVARCHAR(50)  NOT NULL,
+    Prenom        NVARCHAR(50)  NOT NULL,
+    Sexe          CHAR(1)       NOT NULL,
+    DateNaissance DATE          NOT NULL,
+    IdAbonnement  NVARCHAR(50)  NOT NULL,
+    Remarque      NVARCHAR(255) NULL,
+    CONSTRAINT PK_Dependants PRIMARY KEY (Id),
+    CONSTRAINT FK_Dependants_Abonnements
+        FOREIGN KEY (IdAbonnement) REFERENCES Abonnements(Id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT CK_Dependants_Sexe CHECK (Sexe IN ('H', 'F'))
+);
+GO
+
+CREATE TABLE Reabonnements (
+    IdAbonnement       NVARCHAR(50)  NOT NULL,
+    DateRenouvellement DATE          NOT NULL,
+    Remarque           NVARCHAR(255) NULL,
+    CONSTRAINT PK_Reabonnements PRIMARY KEY (IdAbonnement, DateRenouvellement),
+    CONSTRAINT FK_Reabonnements_Abonnements
+        FOREIGN KEY (IdAbonnement) REFERENCES Abonnements(Id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+GO
+
 CREATE TABLE PartiesJouees (
-    IdAbonnement nvarchar(50)  NOT NULL,
-    NoTerrain    int           NOT NULL,
-    DatePartie   date          NOT NULL,
-    Pointage     int           NOT NULL,
-    Remarque     nvarchar(255) NULL,
+    IdAbonnement NVARCHAR(50)  NOT NULL,
+    NoTerrain    INT           NOT NULL,
+    DatePartie   DATE          NOT NULL,
+    Pointage     INT           NOT NULL,
+    Remarque     NVARCHAR(255) NULL,
     CONSTRAINT PK_PartiesJouees PRIMARY KEY (IdAbonnement, NoTerrain, DatePartie),
+    CONSTRAINT FK_PartiesJouees_Abonnements
+        FOREIGN KEY (IdAbonnement) REFERENCES Abonnements(Id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT FK_PartiesJouees_Terrains
         FOREIGN KEY (NoTerrain) REFERENCES Terrains(No)
         ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT CK_PartiesJouees_Pointage CHECK (Pointage > 0)
 );
 GO
+
+-- ============================================================
+-- 4. TABLE ENFANT DE NIVEAU 3
+-- ============================================================
+
+CREATE TABLE Depenses (
+    No           INT           NOT NULL,
+    IdAbonnement NVARCHAR(50)  NOT NULL,
+    DateDepense  DATE          NOT NULL,
+    Montant      MONEY         NOT NULL,
+    NoService    INT           NOT NULL,
+    Remarque     NVARCHAR(255) NULL,
+    CONSTRAINT PK_Depenses PRIMARY KEY (No),
+    CONSTRAINT FK_Depenses_Abonnements
+        FOREIGN KEY (IdAbonnement) REFERENCES Abonnements(Id)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT FK_Depenses_Services
+        FOREIGN KEY (NoService) REFERENCES Services(No)
+        ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT CK_Depenses_Montant CHECK (Montant > 0 AND Montant <= 1000.00)
+);
+GO
+
+-- ============================================================
+-- 5. INSERTIONS INITIALES (DONNÉES DE BASE)
+-- ============================================================
 
 INSERT INTO Provinces (Id, Nom, Remarque) VALUES
 ('AB', N'Alberta',                    NULL),
@@ -119,7 +231,16 @@ INSERT INTO Provinces (Id, Nom, Remarque) VALUES
 ('YT', N'Territoire du Yukon',        NULL);
 GO
 
--- 6 distinct names: 3 x 18 holes, 3 x 9 holes
+INSERT INTO TypesEmploye (No, Description, Remarque) VALUES
+(1, N'Administrateur',            N'Il n''y en a qu''un et son numéro est 1'),
+(2, N'Direction',                 NULL),
+(3, N'Propriétaire d''un club',   NULL),
+(4, N'Employé d''un club',        NULL),
+(5, N'Employé Pro-Shop',          NULL),
+(6, N'Employé d''un restaurant',  NULL),
+(7, N'Professeur de golf',        NULL);
+GO
+
 INSERT INTO Terrains (No, Nom, NombreTrous, Description, Remarque) VALUES
 (1, N'Golf Les Érables',      18, N'Parcours 18 trous, normale 72',           NULL),
 (2, N'Golf Le Faucon',        18, N'Parcours 18 trous boisé, normale 71',     NULL),
@@ -146,46 +267,3 @@ INSERT INTO PrixDepensesAbonnements (NoTypeAbonnement, Annee, Prix, DepensesObli
 (5, 2026, 2000.00, 750.00, NULL),
 (6, 2026, 2200.00, 750.00, NULL);
 GO
-
-ALTER TABLE PartiesJouees
-    ADD CONSTRAINT FK_PartiesJouees_Abonnements
-        FOREIGN KEY (IdAbonnement) REFERENCES Abonnements(Id)
-        ON DELETE NO ACTION ON UPDATE NO ACTION;
-GO
-
-
-Create table Abonnements(
-Id nvarchar(10) primary key not null,
-DateAbonnement date not null,
-Nom nvarchar(20) not null,
-Prenom nvarchar(20) not null,
-Sexe nvarchar(1) not null,
-DateNaissance date not null,
-NoCivique nvarchar(20) not null,
-Rue nvarchar(20) not null,
-Ville nvarchar(20) not null,
-IdProvince nvarchar(2) foreign key References Provinces(Id) not null,
-CodePostal nvarchar(6) not null,
-Telephone nvarchar(10) not null,
-Cellulaire nvarchar(10),
-NoTypeAbonnement int foreign Key References TypesAbonnement(No) not null,
-Remarque nvarchar(50)
-)
-
-Create Table Dependants(
-Id nvarchar(10) primary key not null,
-Nom nvarchar(20) not null,
-Prenom nvarchar(20) not null,
-Sexe nvarchar(1) not null,
-DateNaissance date not null,
-IdAbonnement int foreign key references Abonnements(Id) not null,
-Remarque nvarchar(50)
-)
-
-create table ReAbonnements(
-IdAbonnement nvarchar(10) foreign key references Abonnements(Id) not null,
-DateRenouvellement date not null,
-Remarque nvarchar(50),
-primary key (IdAbonnement, DateRenouvellement)
-)
-
