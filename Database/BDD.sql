@@ -3,6 +3,25 @@
 -- Ken-Li Roux --
 
 USE BDB56P2BKG;
+
+GO
+
+-- ============================================================
+-- 0. SUPPRESSION DES TABLES EXISTANTES (Enfants -> Parents)
+-- ============================================================
+DROP TABLE IF EXISTS Depenses;
+DROP TABLE IF EXISTS PartiesJouees;
+DROP TABLE IF EXISTS Reabonnements;
+DROP TABLE IF EXISTS Dependants;
+DROP TABLE IF EXISTS Services;
+DROP TABLE IF EXISTS Abonnements;
+DROP TABLE IF EXISTS Employes;
+DROP TABLE IF EXISTS PrixDepensesAbonnements;
+DROP TABLE IF EXISTS Terrains;
+DROP TABLE IF EXISTS TypesAbonnement;
+DROP TABLE IF EXISTS TypesEmploye;
+DROP TABLE IF EXISTS Provinces;
+
 GO
 
 -- ============================================================
